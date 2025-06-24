@@ -10,16 +10,20 @@ import ast
 
 variables = pd.read_csv("variables.csv")
 variables["id"] = variables.index
-variables["level_size"] = 1
+variables["level_size"] = 2
 variables["filter_fields"] = [ [] for i in range(0, len(variables)) ]
 variables["available_grids"] = variables["available_grids"].apply(ast.literal_eval)
 variables.rename(columns={"var":"name"}, inplace=True)
+num_individuales = len(variables.index)
 variables_mun = pd.read_csv("variables_muns.csv")
-variables_mun["id"] = variables_mun.index + len(variables)
-variables_mun["level_size"] = 1
+variables_mun["id"] = variables_mun.index + num_individuales
+variables_mun.set_index("id", inplace=True, drop=False)
+variables_mun["level_size"] = 3
 variables_mun["filter_fields"] = [ [] for i in range(0, len(variables_mun)) ]
 variables_mun["available_grids"] = variables_mun["available_grids"].apply(ast.literal_eval)
+variables_mun["bin"] = variables_mun["bin"].astype('str')
 variables_mun.rename(columns={"var":"name"}, inplace=True)
+
 
 lista_var = variables[["id", "name", "level_size", "filter_fields", "available_grids"]].to_dict(orient='records')
 lista_var_muns = variables_mun[["id", "name", "level_size", "filter_fields", "available_grids"]].to_dict(orient='records')
@@ -43,11 +47,12 @@ def me_api():
 def single_var(id):
     q = request.args.get('q', '*')
     datos = []
-    level_id = 0
-    print(variables.columns)
-    for columna in ["name", "rango"]:
-        datos.append({"level_id": level_id, "id":id,  columna:variables.loc[variables["id"] == int(id), columna].values[0]})
-        level_id = level_id + 1
+    if int(id) < num_individuales:
+        for columna in ["name", "rango"]:
+            datos.append({"level_id": columna, "id":id,  "data":{columna:variables.loc[variables["id"] == int(id), columna].values[0]}})
+    else:
+        for columna in ["name", "rango", "bin"]:
+            datos.append({"level_id": columna, "id":id,  "data":{columna:variables_mun.loc[variables_mun["id"] == int(id), columna].values[0]}})
     respuesta = Response(response=json.dumps(datos), status=200, mimetype="application/json")
     return respuesta
 
@@ -58,10 +63,19 @@ def get_data_id(id):
     """Obtiene datos específicos de una covariable por ID y filtros opcionales."""
     levels_id = request.args.get('levels_id', "[0]")
     levels_id = ast.literal_eval(levels_id)
-    list_of_levels = variables.columns[2:4]
-    levels_response = [variables.loc[variables["id"] == int(id), list_of_levels[i]].values[0] for i in levels_id]
-    lista = ast.literal_eval(variables.loc[int(id)]["valores"])
-    respuesta = [{"id": id, "grid_id":"ensanut", "level_id":levels_response,"n":len(lista), "cells":lista }]
+    if int(id) < num_individuales:
+        if len(levels_id) > variables.loc[int(id),"level_size"]:
+            levels_id = levels_id[0:variables.loc[int(id)]["level_size"]]
+        list_of_levels = variables.columns[2:4]
+        levels_response = [variables.loc[variables["id"] == int(id), list_of_levels[i]].values[0] for i in levels_id]
+        lista = ast.literal_eval(variables.loc[int(id)]["valores"])
+        respuesta = [{"id": id, "grid_id":"ensanut", "level_id":levels_response,"n":len(lista), "cells":lista }]
+    else:
+        list_of_levels = variables_mun.columns[2:5]
+        levels_response = [variables_mun.loc[variables_mun["id"] == int(id), list_of_levels[i]].values[0] for i in levels_id]
+        lista = ast.literal_eval(variables_mun.loc[int(id)]["valores"])
+        respuesta = [{"id": id, "grid_id":"mun", "level_id":levels_response,"n":len(lista), "cells":lista }]
+        
     return Response(response=json.dumps(respuesta), mimetype="application/json")
 
 
