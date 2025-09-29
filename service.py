@@ -106,3 +106,6 @@ def info():
                          "info": "Bases de datos y diccionarios originales"}
                     ]}
     return Response(response=json.dumps(informacion), mimetype="application/json")
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=4500)
