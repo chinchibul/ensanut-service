@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import Response, request
+from flask import Response, request, jsonify
 import pandas as pd
 import json
 import ast
@@ -40,8 +40,25 @@ def hello_world():
 
 @app.route("/variables/")
 def me_api():
-    respuesta = Response(response=lista_total, status=200, mimetype="application/json")
-    return respuesta
+    lvars = variables[["name", "rango"]].groupby("name").count()
+    lvars.rename(columns={"rango":"level_size"}, inplace=True)
+    lvars["available_grids"] = [ ["ensanut"] for _ in lvars.index]
+    lvars["id"] = [ i for i in range(0, len(lvars.index))]
+    lvars["info"] = [ {"labels": "labels from some dict", "name_extendend":"some name from some dict"} for _ in lvars.index]
+    lvars.reset_index(inplace=True)
+    lvars_dict = lvars.to_dict("records")    
+
+    mvars = variables_mun[["name", "rango", "bin"]].groupby(["name", "rango"]).count()
+    mvars.rename(columns={"bin":"level_size"}, inplace=True)
+    mvars["available_grids"] = [ ["mun"] for _ in mvars.index]
+    mvars["id"] = [ i for i in range(0, len(mvars.index))]
+    mvars["info"] = [ {"labels": "labels from some dict", "name_extendend":"some name from some dict"} for _ in mvars.index]
+    mvars.reset_index(inplace=True)
+    mvars["id"] = mvars["name"]
+    mvars_dict = mvars.to_dict("records")
+    mvars_dict.extend(lvars_dict)
+    return jsonify(mvars_dict)
+
 
 @app.route("/variables/<id>")
 def single_var(id):
