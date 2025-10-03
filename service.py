@@ -98,13 +98,11 @@ def get_data_id(id):
 @app.route('/info')
 def info():
     informacion = {"name": "ENSANUT Continua 2021",
-                    "description": " Información sobre la experiencia familiar de la pandemia, los efectos en el ingreso, la seguridad alimentaria, la calidad de la dieta, el acceso a servicios de salud, así como la medición de anticuerpos de SARS-CoV-2 para estimar el porcentaje de la población que ha estado expuesta al coronavirus y/o que ha sido vacunada; además, retoma los elementos de monitoreo del estado de salud y nutrición de la población mexicana.",
-                    "meta": [
-                        {"url":"https://ensanut.insp.mx/encuestas/ensanutcontinua2021/index.php",
-                         "info": "Sitio Web"},
-                        {"url":"https://ensanut.insp.mx/encuestas/ensanutcontinua2021/descargas.php",
+                    "description": "Datos de la ENSANUT 2021.",
+                    "meta": {"url":"https://ensanut.insp.mx/encuestas/ensanutcontinua2021/descargas.php",
                          "info": "Bases de datos y diccionarios originales"}
-                    ]}
+                   }
+    return jsonify(informacion)
     return Response(response=json.dumps(informacion), mimetype="application/json")
 
 if __name__ == '__main__':
