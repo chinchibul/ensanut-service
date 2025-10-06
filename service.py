@@ -42,19 +42,21 @@ def hello_world():
 def me_api():
     lvars = variables[["name", "rango"]].groupby("name").count()
     lvars.rename(columns={"rango":"level_size"}, inplace=True)
-    lvars["available_grids"] = [ ["ensanut"] for _ in lvars.index]
+    lvars["taxonomia"] = variables[["name", "taxonomia"]].groupby("name").max()
+    lvars["available_grids"] = [["ensanut"] for _ in lvars.index]
     lvars["id"] = [ i for i in range(0, len(lvars.index))]
-    lvars["info"] = [ {"labels": "labels from some dict", "name_extendend":"some name from some dict"} for _ in lvars.index]
+    lvars["info"] = [ {"labels": "labels from some dict",
+                       "name_extendend":"some name from some dict"} for _ in lvars.index]
     lvars.reset_index(inplace=True)
     lvars_dict = lvars.to_dict("records")    
 
     mvars = variables_mun[["name", "rango", "bin"]].groupby(["name", "rango"]).count()
     mvars.rename(columns={"bin":"level_size"}, inplace=True)
     mvars["available_grids"] = [ ["mun"] for _ in mvars.index]
-    mvars["id"] = [ i for i in range(0, len(mvars.index))]
+    mvars["taxonomia"] = variables_mun[["name", "rango", "taxonomia"]].groupby(["name", "rango"]).max()
+    mvars["id"] = [ i + len(lvars.index) for i in range(0, len(mvars.index))]
     mvars["info"] = [ {"labels": "labels from some dict", "name_extendend":"some name from some dict"} for _ in mvars.index]
     mvars.reset_index(inplace=True)
-    mvars["id"] = mvars["name"]
     mvars_dict = mvars.to_dict("records")
     mvars_dict.extend(lvars_dict)
     return jsonify(mvars_dict)
