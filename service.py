@@ -69,11 +69,15 @@ def single_var(id):
     q = request.args.get('q', '*')
     datos = []
     if int(id) < num_individuales:
-        for columna in ["name", "rango"]:
-            datos.append({"level_id": columna, "id":id,  "data":{columna:variables.loc[variables["id"] == int(id), columna].values[0]}})
+        lvars = variables[["name", "rango"]].groupby("name").count()
+        variable = lvars.index[int(id)]
+        levels = variables.loc[variables["name"] == variable, "rango"]
+        datos = [{"level_id": levels.iloc[i], "id":id} for i in range(0, len(levels.index))]
     else:
-        for columna in ["name", "rango", "bin"]:
-            datos.append({"level_id": columna, "id":id,  "data":{columna:variables_mun.loc[variables_mun["id"] == int(id), columna].values[0]}})
+        mvars = variables_mun[["name", "rango", "bin"]].groupby(["name", "rango"]).count()
+        variable = mvars.index[int(id) - num_individuales]
+        _mvars = variables_mun.set_index(["name", "rango"])
+        datos = [{"level_id": i, "id": id} for i in _mvars.loc[variable,"bin"].values]
     respuesta = Response(response=json.dumps(datos), status=200, mimetype="application/json")
     return respuesta
 
