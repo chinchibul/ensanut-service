@@ -14,7 +14,7 @@ variables["level_size"] = 2
 variables["filter_fields"] = [ [] for i in range(0, len(variables)) ]
 variables["available_grids"] = variables["available_grids"].apply(ast.literal_eval)
 variables.rename(columns={"var":"name"}, inplace=True)
-num_individuales = len(variables.index)
+num_individuales = len(variables.groupby("name").count().index)
 variables_mun = pd.read_csv("variables_muns.csv")
 variables_mun["id"] = variables_mun.index + num_individuales
 variables_mun.set_index("id", inplace=True, drop=False)
