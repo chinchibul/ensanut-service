@@ -57,6 +57,8 @@ def me_api():
     mvars["id"] = [ i + len(lvars.index) for i in range(0, len(mvars.index))]
     mvars["info"] = [ {"labels": "labels from some dict", "name_extendend":"some name from some dict"} for _ in mvars.index]
     mvars.reset_index(inplace=True)
+    mvars["name"] = mvars["name"] + ":" + mvars["rango"]
+    mvars.drop(columns =["rango"], inplace=True)
     mvars_dict = mvars.to_dict("records")
     mvars_dict.extend(lvars_dict)
     return jsonify(mvars_dict)
