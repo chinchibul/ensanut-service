@@ -40,14 +40,17 @@ def hello_world():
 
 @app.route("/variables/")
 def me_api():
+
+    diccionario = pd.read_csv("21ensanut_a20_hias.csv")
     lvars = variables[["name", "rango"]].groupby("name").count()
     lvars.rename(columns={"rango":"level_size"}, inplace=True)
     lvars["taxonomia"] = variables[["name", "taxonomia"]].groupby("name").max()
     lvars["available_grids"] = [["ensanut"] for _ in lvars.index]
-    lvars["id"] = [ i for i in range(0, len(lvars.index))]
-    lvars["info"] = [ {"labels": "labels from some dict",
-                       "name_extendend":"some name from some dict"} for _ in lvars.index]
+    lvars["id"] = [i for i in range(0, len(lvars.index))]
+    lvars["info"] = [{"section":lvars.loc[i]["taxonomia"].split(".")}
+                      for i in lvars.index]
     lvars.reset_index(inplace=True)
+    lvars.drop(columns=["taxonomia"], inplace=True)
     lvars_dict = lvars.to_dict("records")    
 
     mvars = variables_mun[["name", "rango", "bin"]].groupby(["name", "rango"]).count()
