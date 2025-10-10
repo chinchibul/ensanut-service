@@ -46,16 +46,16 @@ def me_api():
     lvars.rename(columns={"rango":"level_size"}, inplace=True)
     lvars["taxonomia"] = variables[["name", "taxonomia"]].groupby("name").max()
     lvars["available_grids"] = [["ensanut"] for _ in lvars.index]
-    lvars["id"] = [i for i in range(0, len(lvars.index))]
-    lvars["info"] = [{"section":lvars.loc[i]["taxonomia"].split(".")}
-                      for i in lvars.index]
+    lvars["id"] = list(range(0, len(lvars.index)))
+    lvars["info"] = [{"section": lvars.loc[i]["taxonomia"].split(".")}
+                     for i in lvars.index]
     lvars.reset_index(inplace=True)
     lvars.drop(columns=["taxonomia"], inplace=True)
-    lvars_dict = lvars.to_dict("records")    
+    lvars_dict = lvars.to_dict("records")
 
     mvars = variables_mun[["name", "rango", "bin"]].groupby(["name", "rango"]).count()
     mvars.rename(columns={"bin":"level_size"}, inplace=True)
-    mvars["available_grids"] = [ ["mun"] for _ in mvars.index]
+    mvars["available_grids"] = [["mun"] for _ in mvars.index]
     mvars["taxonomia"] = variables_mun[["name", "rango", "taxonomia"]].groupby(["name", "rango"]).max()
     mvars["id"] = [ i + len(lvars.index) for i in range(0, len(mvars.index))]
     mvars.reset_index(inplace=True)
