@@ -47,9 +47,9 @@ def me_api():
     lvars["taxonomia"] = variables[["name", "taxonomia"]].groupby("name").max()
     lvars["available_grids"] = [["ensanut"] for _ in lvars.index]
     lvars["id"] = list(range(0, len(lvars.index)))
-    lvars["info"] = [{"section": lvars.loc[i]["taxonomia"].split(".")}
-                     for i in lvars.index]
     lvars.reset_index(inplace=True)
+    lvars["info"] = [{"section": lvars.loc[i]["taxonomia"].split("."), "nombre_largo":lvars.loc[i]["name"]}
+                     for i in lvars.index]
     lvars.drop(columns=["taxonomia"], inplace=True)
     lvars_dict = lvars.to_dict("records")
 
